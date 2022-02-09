@@ -28,7 +28,7 @@ bool proResponse = true; // Stop processing response
 bool updateOnNotFound = false; // Update onNotFound
 
 // Databse
-const char* serverName = "https://jordanramirez.com/post-esp-data.php";
+String serverName = "https://jordanramirez.com/post-esp-data.php";
 // Keep this API Key value to be compatible with the PHP code provided in the project page. 
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key 
 String apiKeyValue = "tPmAT5Ab3j7F9";
@@ -302,14 +302,18 @@ void createWebServer() {
 }
 
 void sendData() {
-  WiFiClient client;
+  // WiFiClient client;
   HTTPClient http;
 
   // Your Domain name with URL path or IP address with path
-  http.begin(client, serverName);
+  // http.begin(client, serverName);
+  if(http.begin(serverName.c_str())) {
+    Serial.println("Connected to database");
+  }
     
   // Specify content-type header
   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+  // http.addHeader("Content-Type", "text/plain"); 
     
   // Prepare your HTTP POST request data
   String httpRequestData = "&api_key=" + apiKeyValue + "&test=" + "STRINGSENT";
@@ -320,6 +324,7 @@ void sendData() {
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
+    // Serial.println(http.getString());
   }
   else {
     Serial.print("Error code: ");
@@ -335,7 +340,7 @@ void setup() {
   Serial.begin(9600);
   // Allocate Storage For WiFi
   EEPROM.begin(sizeof(struct settings) );
-  // EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
+  EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
   EEPROM.get(0, user_wifi);
   
   // Try WiFi Connection, will create SAP if fails
@@ -363,7 +368,7 @@ void loop() {
       updateOnNotFound = false;
     }
   } 
-  if(WiFi.status() != WL_CONNECTED) {
+  else if(WiFi.status() != WL_CONNECTED) {
     connectToWifi();
   }
   else {
