@@ -28,7 +28,7 @@ bool proResponse = true; // Stop processing response
 bool updateOnNotFound = false; // Update onNotFound
 
 // Databse
-String serverName = "https://jordanramirez.com/post-esp-data.php";
+String serverName = "https://microcontrollergreens.live/receive-esp-data.php";
 // Keep this API Key value to be compatible with the PHP code provided in the project page. 
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key 
 String apiKeyValue = "tPmAT5Ab3j7F9";
@@ -129,7 +129,6 @@ void onGet() {
     // Send Update to User
     request->send(200, "text/html", "<h1>WiFi SSID: " + ssid + ", and Password: " + password + " Saved! Trying connection... If not connected please try again, and rejoin MicroController Greens WiFi </h1>");
 
-
     // Transfer User data to settings
     strncpy(user_wifi.ssid, ssid.c_str(), sizeof(user_wifi.ssid));
     strncpy(user_wifi.password, password.c_str(), sizeof(user_wifi.password));
@@ -137,7 +136,7 @@ void onGet() {
 
     // Turn off responses
     proResponse = false;
-    server.onNotFound(NULL);
+    // server.onNotFound(NULL);
 
     // Connect to WiFi
     connectToWifi();
@@ -157,8 +156,8 @@ void onGet() {
       Serial.print("\n");
 
       // Update responses
-      updateOnNotFound = true;
-      vTaskDelay(1000 / portTICK_PERIOD_MS); 
+      //updateOnNotFound = true;
+      // vTaskDelay(1000 / portTICK_PERIOD_MS); 
       proResponse = true;
       webRequest(request);
     }
@@ -176,94 +175,9 @@ void onGet() {
       EEPROM.put(0, user_wifi);
 
     }
-
   });
 }
-/*
-void onGet(AsyncWebServerRequest *request)
-{
-  String ssid;
-  String password;
 
-  // CHECK Which Type
-  // if(request->hasParam("ssid")) {
-  //   Serial.println("No True");
-  // }
-  // if(request->hasParam("ssid", true)) {
-  //   Serial.println("One True");
-  // }
-  // if(request->hasParam("ssid", true, true)) {
-  //   Serial.println("Two True");
-  // }
-
-  // Checking for inputs
-  if (request->hasParam("ssid", true)) {
-    ssid = request->getParam("ssid", true)->value();
-    Serial.println("SSID: " + ssid);
-  }
-  if (request->hasParam("password"), true) {
-    password = request->getParam("password", true)->value();
-    Serial.println("Password: " + password);
-  }
-
-  // Check for length less than 30
-  if ((password.length() <= 30) || (ssid.length() <= 30))
-  {
-    // Update webpage
-    request->send(200, "text/html", "<h1>WiFi SSID: " + ssid + ", and Password: " + password + " Saved! Trying connection... If not connected please try again, and rejoin MicroController Greens WiFi </h1>");
-
-    vTaskDelay(1000 / portTICK_PERIOD_MS); 
-  
-    // Save to WiFi Data
-    strncpy(user_wifi.ssid, ssid.c_str(), sizeof(user_wifi.ssid));
-    strncpy(user_wifi.password, password.c_str(), sizeof(user_wifi.password));
-    user_wifi.ssid[ssid.length()] = user_wifi.password[password.length()] = '\0';    
-
-    // Remove server handler
-    server.onNotFound(NULL);
-    Serial.println("Stop Processing Response: Stop");
-
-    // Shut Down DNS Server
-    // Serial.println("Server Shutting Down");
-    // dnsServer.stop();
-    // server.end();
-    // WiFi.softAPdisconnect();
-
-    // Turn off Processing response
-    Serial.println("Processing set to false");
-    proResponse = false;
-    connectToWifi();
-    
-    if(WiFi.status() != WL_CONNECTED) {
-      // Turn on server response
-      Serial.println("Set Try again to True");
-      tryAgain = true;
-
-      // Clean user_wifi
-      Serial.print("Cleaning old WiFi Data");
-      for(int i = 0; i < 30; i++) {
-        Serial.print(".");
-        user_wifi.password[i] = 0;
-        user_wifi.ssid[i] = 0;
-      }
-      Serial.print("\n");
-
-      // Update responses
-      updateOnNotFound = true;
-      vTaskDelay(1000 / portTICK_PERIOD_MS); 
-      proResponse = true;
-      webRequest(request);
-    }
-  }
-  else
-  {
-    Serial.println("SSID or Password Too long");
-    request->send(200, "text/html", "<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><h1>Wifi SSID or Password too long, please try again.</h1><title>MicroController Greens Wifi Setup</title> <style>*,::after,::before{box-sizing:border-box;}body{margin:0;font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,'Noto Sans','Liberation Sans';font-size:1rem;font-weight:400;line-height:1.5;color:#212529;background-color:#f5f5f5;}.form-control{display:block;width:100%;height:calc(1.5em + .75rem + 2px);border:1px solid #ced4da;}button{cursor: pointer;border:1px solid transparent;color:#fff;background-color:#007bff;border-color:#007bff;padding:.5rem 1rem;font-size:1.25rem;line-height:1.5;border-radius:.3rem;width:100%}.form-signin{width:100%;max-width:400px;padding:15px;margin:auto;}h1{text-align: center}</style> </head> <body><main class='form-signin'> <form action='/get' method='post'> <h1 class=''>MicroController Greens Wifi Setup</h1><br/><div class='form-floating'><label>SSID</label><input type='text' class='form-control' name='ssid'> </div><div class='form-floating'><br/><label>Password</label><input type='password' class='form-control' name='password'></div><br/><br/><button type='submit'>Save</button><p style='text-align: right'></p></form></main> </body></html>");
-
-  }
-
-}
-*/
 void onNotFound() {
   server.onNotFound([](AsyncWebServerRequest *request){
     Serial.print("server.notfound triggered: ");
@@ -316,7 +230,10 @@ void sendData() {
   // http.addHeader("Content-Type", "text/plain"); 
     
   // Prepare your HTTP POST request data
-  String httpRequestData = "&api_key=" + apiKeyValue + "&test=" + "STRINGSENT";
+  int breakBeam = 1;
+  int moisture = 101;
+  int light = 4242;
+  String httpRequestData = "&api_key=" + apiKeyValue + "&breakBeam=" + breakBeam + "&moisture=" + moisture + "&light=" + light;
 
   // Send HTTP POST request
   int httpResponseCode = http.POST(httpRequestData);
@@ -340,7 +257,7 @@ void setup() {
   Serial.begin(9600);
   // Allocate Storage For WiFi
   EEPROM.begin(sizeof(struct settings) );
-  EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
+  // EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
   EEPROM.get(0, user_wifi);
   
   // Try WiFi Connection, will create SAP if fails
@@ -359,22 +276,19 @@ void loop() {
     if(proResponse) {
       // Handle WiFi
       dnsServer.processNextRequest();
-      vTaskDelay(10);
     }
-    if(updateOnNotFound) {
-      Serial.println("Update onNotFound to take inputs");
-      onNotFound();
-      vTaskDelay(100);
-      updateOnNotFound = false;
-    }
+    vTaskDelay(10);
   } 
   else if(WiFi.status() != WL_CONNECTED) {
     connectToWifi();
   }
   else {
     Serial.println("Connected!");
-    delay(1000);
+    // Check Sensors
+    // Make Adjustments
+    // Send Data
     sendData();
+    delay(1000);
   }
 
 }
