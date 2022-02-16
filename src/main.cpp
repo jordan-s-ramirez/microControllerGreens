@@ -10,6 +10,9 @@
 // Databse
 #include <HTTPClient.h>
 
+//Our Files
+#include <pwm.h>
+
 // Server
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
 DNSServer dnsServer;       // This creates a DNS server, required for the captive portal
@@ -255,6 +258,9 @@ void sendData() {
 
 void setup() {
   Serial.begin(9600);
+  // Set up PWM
+  setupPWM(0, 5000, 8, 13);
+
   // Allocate Storage For WiFi
   EEPROM.begin(sizeof(struct settings) );
   // EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
@@ -272,6 +278,7 @@ void setup() {
 }
 
 void loop() {
+  setPWMDutyCycle(50);
   if(!gotInfo) {
     if(proResponse) {
       // Handle WiFi
