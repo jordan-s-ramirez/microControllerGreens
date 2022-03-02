@@ -10,8 +10,9 @@
 // Databse
 #include <HTTPClient.h>
 
-//Our Files
-#include <pwm.h>
+// Our Files
+#include "PWM.h"
+#include "LightSensor.h"
 
 // Server
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
@@ -260,6 +261,8 @@ void setup() {
   Serial.begin(9600);
   // Set up PWM
   setupPWM(0, 5000, 8, 13);
+  // Set up Light Sensor
+  setupLightSensor(18, 22, 21);
 
   // Allocate Storage For WiFi
   EEPROM.begin(sizeof(struct settings) );
@@ -279,6 +282,7 @@ void setup() {
 
 void loop() {
   setPWMDutyCycle(50);
+  Serial.println(getLightValue());
   if(!gotInfo) {
     if(proResponse) {
       // Handle WiFi
