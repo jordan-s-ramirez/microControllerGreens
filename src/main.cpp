@@ -257,12 +257,18 @@ void sendData() {
   delay(10000);
 }
 
+uint8_t PWMCounter = 50;
+int PWMDir = 1;
+
 void setup() {
   Serial.begin(9600);
   // Set up PWM
-  setupPWM(0, 5000, 8, 13);
+  setupPWM(0, 5000, 8, 26);
   // Set up Light Sensor
   setupLightSensor(18, 22, 21);
+  // Set up break beam sensor
+  pinMode(2, INPUT);
+  pinMode(BUILTIN_LED, OUTPUT);
 
   // Allocate Storage For WiFi
   EEPROM.begin(sizeof(struct settings) );
@@ -281,8 +287,25 @@ void setup() {
 }
 
 void loop() {
-  setPWMDutyCycle(50);
-  Serial.println(getLightValue());
+  if(PWMCounter >= 100) {
+    PWMDir = -1;
+  } else if(PWMCounter <= 0) {
+    PWMDir = 1;
+  }
+  PWMCounter += PWMDir;
+  Serial.print("PWMCounter: ");
+  Serial.println(PWMCounter);
+  setPWMDutyCycle(PWMCounter);
+  // Serial.print("Light: ");
+  // Serial.println(getLightValue());
+  int reading = digitalRead(2);
+  if (reading == HIGH) {
+    digitalWrite(BUILTIN_LED, HIGH);
+  } else {
+    digitalWrite(BUILTIN_LED, LOW);
+  }
+  Serial.print("Break Beam: ");
+  Serial.println(reading);
   if(!gotInfo) {
     if(proResponse) {
       // Handle WiFi
@@ -301,5 +324,5 @@ void loop() {
     sendData();
     delay(1000);
   }
-
+  delay(500);
 }
