@@ -19,7 +19,7 @@ void setupPWM(uint8_t channel, int frequency, uint8_t resolution, uint8_t gpioPi
     pinMode(gpioPin, OUTPUT);
     ledcSetup(channel, frequency, resolution);
     ledcAttachPin(gpioPin, channel);
-    ledcWrite(channel, 128);
+    ledcWrite(channel, 0);
 }
 
 void setPWMDutyCycle(uint8_t dutyCycle) {
