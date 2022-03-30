@@ -10,21 +10,21 @@ int PWMDir = 1;
 
 void setup() {
   Serial.begin(9600);
-  // // Set up PWM
-  // setupPWM(0, 5000, 8, 26);
-  // ////////////////////////////////////////////////
-  // // Set up Light Sensor
-  // setupLightSensor(18, 22, 21);
-  // ////////////////////////////////////////
-  // // Set up break beam sensor
-  // pinMode(4, INPUT);
-  // pinMode(BUILTIN_LED, OUTPUT);
-  // ////////////////////////////////////////
-  // // Set up soil moisture sensor
-  // pinMode(15, INPUT);
-  // ////////////////////////////////////////////
-  // // Set up motor
-  // pinMode(27, OUTPUT);
+  // Set up PWM
+  setupPWM(0, 5000, 8, 26);
+  ////////////////////////////////////////////////
+  // Set up Light Sensor
+  setupLightSensor(18, 22, 21);
+  ////////////////////////////////////////
+  // Set up break beam sensor
+  pinMode(4, INPUT);
+  pinMode(BUILTIN_LED, OUTPUT);
+  ////////////////////////////////////////
+  // Set up soil moisture sensor
+  pinMode(15, INPUT);
+  ////////////////////////////////////////////
+  // Set up motor
+  pinMode(27, OUTPUT);
 
   ////////////////////////////////////////////////////////
 
@@ -43,37 +43,37 @@ void setup() {
 }
 
 void loop() {
-  // if(PWMCounter >= 100) {
-  //   PWMDir = -1;
-  // } else if(PWMCounter <= 0) {
-  //   PWMDir = 1;
-  // }
-  // PWMCounter += PWMDir;
-  // Serial.print("PWMCounter: ");
-  // Serial.println(PWMCounter);
-  // setPWMDutyCycle(PWMCounter);
-  // //////////////////////////////////////////////
-  // Serial.print("Light: ");
-  // Serial.println(getLightValue());
-  // //////////////////////////////////////////////
-  // int reading = digitalRead(4);
-  // if (reading == HIGH) {
-  //   digitalWrite(BUILTIN_LED, HIGH);
-  // } else {
-  //   digitalWrite(BUILTIN_LED, LOW);
-  // }
-  // Serial.print("Break Beam: ");
-  // Serial.println(reading);
-  // //////////////////////////////////////////////
-  // reading = analogRead(15);
-  // Serial.print("Soil Moisture: ");
-  // Serial.println(reading);
-  // ////////////////////////////////////////////
-  // if(PWMCounter % 8 < 4) {
-  //   digitalWrite(27, HIGH);
-  // } else {
-  //   digitalWrite(27, LOW);
-  // }
+  if(PWMCounter >= 100) {
+    PWMDir = -1;
+  } else if(PWMCounter <= 0) {
+    PWMDir = 1;
+  }
+  PWMCounter += PWMDir;
+  Serial.print("PWMCounter: ");
+  Serial.println(PWMCounter);
+  setPWMDutyCycle(PWMCounter);
+  //////////////////////////////////////////////
+  Serial.print("Light: ");
+  Serial.println(getLightValue());
+  //////////////////////////////////////////////
+  int reading = digitalRead(4);
+  if (reading == HIGH) {
+    digitalWrite(BUILTIN_LED, HIGH);
+  } else {
+    digitalWrite(BUILTIN_LED, LOW);
+  }
+  Serial.print("Break Beam: ");
+  Serial.println(reading);
+  //////////////////////////////////////////////
+  reading = analogRead(15);
+  Serial.print("Soil Moisture: ");
+  Serial.println(reading);
+  ////////////////////////////////////////////
+  if(PWMCounter % 8 < 4) {
+    digitalWrite(27, HIGH);
+  } else {
+    digitalWrite(27, LOW);
+  }
   /////////////////////////////////////////
   wifiLoop();
   ///////////////////////////////////////////////////
