@@ -28,12 +28,18 @@ void setup() {
 
   ////////////////////////////////////////////////////////
 
+  delay(10000);
+
   // Allocate Storage For WiFi
   Settings user_wifi = getWifiInfo();
   EEPROM.begin(sizeof(user_wifi));
-  // EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
+  EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
   EEPROM.get(0, user_wifi);
   
+  Serial.println("user_wifi");
+  Serial.println(user_wifi.password);
+  Serial.println(user_wifi.ssid);
+
   // Try WiFi Connection, will create SAP if fails
   connectToWifi();
 
@@ -74,7 +80,7 @@ void loop() {
   } else {
     digitalWrite(27, LOW);
   }
-  /////////////////////////////////////////
+  ///////////////////////////////////////
   wifiLoop();
   ///////////////////////////////////////////////////
   delay(500);

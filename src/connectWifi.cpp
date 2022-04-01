@@ -5,7 +5,7 @@ AsyncWebServer server(80); // This creates a web server, required in order to ho
 DNSServer dnsServer;       // This creates a DNS server, required for the captive portal
 
 // User WiFi Settings
-static Settings user_wifi;
+static Settings user_wifi = {0};
 
 // booleans
 bool gotInfo = false;  // Check if we got info
@@ -14,7 +14,7 @@ bool proResponse = true; // Stop processing response
 bool updateOnNotFound = false; // Update onNotFound
 
 // Databse
-String serverName = "https://microcontrollergreens.live/receive-esp-data.php";
+String serverName = "https://microcontrollergreens.live/ESPSendAndRecieve.php";
 // Keep this API Key value to be compatible with the PHP code provided in the project page. 
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key 
 String apiKeyValue = "tPmAT5Ab3j7F9";
@@ -153,10 +153,14 @@ void onGet() {
       // Turn off webserver
       Serial.println("Turn off DNS");
       dnsServer.stop();
+      vTaskDelay(10);
       Serial.println("Turn off Server");
       server.end();
+      vTaskDelay(10);
       Serial.println("Turn off SAP");
-      WiFi.softAPdisconnect();
+      WiFi.softAPdisconnect(true);
+      vTaskDelay(10);
+
       // Save data
       EEPROM.put(0, user_wifi);
 
@@ -201,7 +205,7 @@ void createWebServer() {
   Serial.println("Setup complete");
 }
 
-void sendData() {
+void sendAndGetData() {
   // WiFiClient client;
   HTTPClient http;
 
@@ -223,11 +227,13 @@ void sendData() {
 
   // Send HTTP POST request
   int httpResponseCode = http.POST(httpRequestData);
+  Serial.println("Data was sent");
   
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
-    // Serial.println(http.getString());
+    Serial.println(http.getString());
+    Serial.println("Data was recieved"); 
   }
   else {
     Serial.print("Error code: ");
@@ -235,7 +241,6 @@ void sendData() {
   }
 
   http.end();
-  Serial.println("Data was sent");
   delay(10000);
 }
 
@@ -272,7 +277,7 @@ void wifiLoop() {
     // Check Sensors
     // Make Adjustments
     // Send Data
-    sendData();
+    sendAndGetData();
     delay(1000);
   }
 }

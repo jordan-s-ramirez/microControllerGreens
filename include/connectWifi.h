@@ -21,9 +21,8 @@ void onGet();
 void onNotFound();
 void webServerSetup();
 void createWebServer();
-void sendData();
+void sendAndGetData();
 Settings getWifiInfo();
 void setUserInfo(String ssid, String password);
 void testWifiConnection();
 void wifiLoop();
-
