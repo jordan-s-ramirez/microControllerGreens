@@ -13,6 +13,8 @@ struct Settings
   char ssid[30];
   char password[30];
 }; 
+static Settings user_wifi = {0};
+
 
 void connectToWifi();
 void webRequest(AsyncWebServerRequest *request);
@@ -23,6 +25,5 @@ void webServerSetup();
 void createWebServer();
 void sendAndGetData();
 Settings getWifiInfo();
-void setUserInfo(String ssid, String password);
-void testWifiConnection();
 void wifiLoop();
+void wifiSetupLoop();

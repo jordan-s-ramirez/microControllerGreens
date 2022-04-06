@@ -5,7 +5,6 @@ AsyncWebServer server(80); // This creates a web server, required in order to ho
 DNSServer dnsServer;       // This creates a DNS server, required for the captive portal
 
 // User WiFi Settings
-static Settings user_wifi = {0};
 
 // booleans
 bool gotInfo = false;  // Check if we got info
@@ -21,9 +20,6 @@ String apiKeyValue = "tPmAT5Ab3j7F9";
 
 void connectToWifi()
 {
-  // Make WiFi as a Station
-  WiFi.mode(WIFI_STA);
-
   // Check to see if we got info
   if (user_wifi.ssid[0] != 0)
   {
@@ -38,7 +34,7 @@ void connectToWifi()
     // Connect to WiFi
     while ((WiFi.status() != WL_CONNECTED ) && tries < 10)
     {
-      vTaskDelay(400 / portTICK_PERIOD_MS);
+      delay(500);
       Serial.println("Trying to Connect... ");
       tries++;
     }
@@ -48,7 +44,6 @@ void connectToWifi()
   if (WiFi.status() != WL_CONNECTED)
   {
     Serial.println("Failed to Connect to WiFi!");
-    gotInfo = false;
   }
   else
   {
@@ -84,8 +79,8 @@ void webRequest(AsyncWebServerRequest *request) {
 }
 
 void createSAP() {
-  // Enabling WiFi as soft access point
-  WiFi.mode(WIFI_MODE_AP);
+  // Enabling WiFi as soft access point and station
+  WiFi.mode(WIFI_AP_STA);
 
   Serial.println("Setting Soft Access Point: Setup");
   Serial.println(WiFi.softAP("MicroController Greens", NULL) ? "Ready" : "Failed!");
@@ -112,9 +107,6 @@ void onGet() {
       Serial.println("Password: " + password);
     }
 
-    // Send Update to User
-    request->send(200, "text/html", "<h1>WiFi SSID: " + ssid + ", and Password: " + password + " Saved! Trying connection... If not connected please try again, and rejoin MicroController Greens WiFi </h1>");
-
     // Transfer User data to settings
     strncpy(user_wifi.ssid, ssid.c_str(), sizeof(user_wifi.ssid));
     strncpy(user_wifi.password, password.c_str(), sizeof(user_wifi.password));
@@ -122,7 +114,6 @@ void onGet() {
 
     // Turn off responses
     proResponse = false;
-    // server.onNotFound(NULL);
 
     // Connect to WiFi
     connectToWifi();
@@ -133,21 +124,18 @@ void onGet() {
       tryAgain = true;
 
       // Clean user_wifi
-      Serial.print("Cleaning old WiFi Data");
+      Serial.print("Cleaning old WiFi Data\n");
       for(int i = 0; i < 30; i++) {
-        Serial.print(".");
         user_wifi.password[i] = 0;
         user_wifi.ssid[i] = 0;
       }
-      Serial.print("\n");
 
       // Update responses
-      //updateOnNotFound = true;
-      // vTaskDelay(1000 / portTICK_PERIOD_MS); 
       proResponse = true;
       webRequest(request);
     }
     else {
+      request->send(200, "text/html", "<h1>WiFi SSID: " + ssid + ", and Password: " + password + " Saved! Trying connection... If not connected please try again, and rejoin MicroController Greens WiFi </h1>");
       // Get Info
       gotInfo = true;
       // Turn off webserver
@@ -158,11 +146,8 @@ void onGet() {
       server.end();
       vTaskDelay(10);
       Serial.println("Turn off SAP");
-      WiFi.softAPdisconnect(true);
+      WiFi.softAPdisconnect(false); // false to not turn off Wifi.mode()
       vTaskDelay(10);
-
-      // Save data
-      EEPROM.put(0, user_wifi);
 
     }
   });
@@ -244,40 +229,37 @@ void sendAndGetData() {
   delay(10000);
 }
 
-Settings getWifiInfo() {
-  return user_wifi;
-}
-
-void setUserInfo(String ssid, String password) {
-  strncpy(user_wifi.ssid, ssid.c_str(), sizeof(user_wifi.ssid));
-  strncpy(user_wifi.password, password.c_str(), sizeof(user_wifi.password)); 
-}
-
-void testWifiConnection() {
-  if(WiFi.status() != WL_CONNECTED) {
-    // Create SAP portal Again
-    createSAP();
-    createWebServer();
-  }
-}
-
 void wifiLoop() {
-  if(!gotInfo) {
-    if(proResponse) {
-      // Handle WiFi
+  // if(!gotInfo) {
+  //   if(proResponse) {
+  //     // Handle WiFi
+  //     dnsServer.processNextRequest();
+  //   }
+  //   vTaskDelay(10);
+  // } 
+  // else if(WiFi.status() != WL_CONNECTED) {
+  //   connectToWifi();
+  // }
+  // else {
+  //   Serial.println("Connected!");
+  //   // Check Sensors
+  //   // Make Adjustments
+  //   // Send Data
+  //   sendAndGetData();
+  //   delay(1000);
+  // }
+  save wifi register
+  connect to wifi
+  send sensor values to database
+  get preferences from database
+  disconnect from wifi
+  restore wifi register
+  return preferences
+}
+
+void wifiSetupLoop() {
+  while(WiFi.status() != WL_CONNECTED) {
       dnsServer.processNextRequest();
-    }
-    vTaskDelay(10);
-  } 
-  else if(WiFi.status() != WL_CONNECTED) {
-    connectToWifi();
-  }
-  else {
-    Serial.println("Connected!");
-    // Check Sensors
-    // Make Adjustments
-    // Send Data
-    sendAndGetData();
-    delay(1000);
+      delay(10);
   }
 }

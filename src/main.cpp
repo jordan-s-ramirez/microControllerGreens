@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <EEPROM.h>
+#include "soc/sens_reg.h"
 // Our Files
 #include "PWM.h"
 #include "LightSensor.h"
@@ -7,48 +7,17 @@
 
 uint8_t PWMCounter = 50;
 int PWMDir = 1;
+uint64_t reg_a;
+uint64_t reg_b;
+uint64_t reg_c;
 
-void setup() {
-  Serial.begin(9600);
-  // Set up PWM
-  setupPWM(0, 5000, 8, 26);
-  ////////////////////////////////////////////////
-  // Set up Light Sensor
-  setupLightSensor(18, 22, 21);
-  ////////////////////////////////////////
-  // Set up break beam sensor
-  pinMode(4, INPUT);
-  pinMode(BUILTIN_LED, OUTPUT);
-  ////////////////////////////////////////
-  // Set up soil moisture sensor
-  pinMode(15, INPUT);
-  ////////////////////////////////////////////
-  // Set up motor
-  pinMode(27, OUTPUT);
-
-  ////////////////////////////////////////////////////////
-
-  delay(10000);
-
-  // Allocate Storage For WiFi
-  Settings user_wifi = getWifiInfo();
-  EEPROM.begin(sizeof(user_wifi));
-  EEPROM.put(0, user_wifi); // DELETES PREVIOSU SAVED WIFI SETTINGS
-  EEPROM.get(0, user_wifi);
-  
-  Serial.println("user_wifi");
-  Serial.println(user_wifi.password);
-  Serial.println(user_wifi.ssid);
-
-  // Try WiFi Connection, will create SAP if fails
-  connectToWifi();
-
-  // If Not connected to WiFi
-  testWifiConnection();
-  ///////////////////////////////////////////////
+void resetWifi() {
+  WRITE_PERI_REG(SENS_SAR_START_FORCE_REG, reg_a);  // fix ADC registers
+  WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b);
+  WRITE_PERI_REG(SENS_SAR_MEAS_START2_REG, reg_c);
 }
 
-void loop() {
+int hardwareLoop(int preferences) {
   if(PWMCounter >= 100) {
     PWMDir = -1;
   } else if(PWMCounter <= 0) {
@@ -80,6 +49,43 @@ void loop() {
   } else {
     digitalWrite(27, LOW);
   }
+  return 0;
+}
+
+void setup() {
+  Serial.begin(9600);
+  // Save Wifi register values
+  reg_a = READ_PERI_REG(SENS_SAR_START_FORCE_REG);
+  reg_b = READ_PERI_REG(SENS_SAR_READ_CTRL2_REG);
+  reg_c = READ_PERI_REG(SENS_SAR_MEAS_START2_REG);
+  // Set up PWM
+  // setupPWM(0, 5000, 8, 26);
+  // ////////////////////////////////////////////////
+  // // Set up Light Sensor
+  // setupLightSensor(18, 22, 21);
+  // ////////////////////////////////////////
+  // // Set up break beam sensor
+  // pinMode(4, INPUT);
+  // pinMode(BUILTIN_LED, OUTPUT);
+  // ////////////////////////////////////////
+  // // Set up soil moisture sensor
+  // pinMode(15, INPUT);
+  // ////////////////////////////////////////////
+  // // Set up motor
+  // pinMode(27, OUTPUT);
+
+  //////////////////////////////////////////////////////
+  createSAP();
+  createWebServer();
+  wifiSetupLoop();
+  ///////////////////////////////////////////////
+}
+
+void loop() {
+  int sensorVals;
+  int preferences;
+  ///////////////////////////////////////
+  // sensorVals = hardwareLoop(preferences);
   ///////////////////////////////////////
   wifiLoop();
   ///////////////////////////////////////////////////
