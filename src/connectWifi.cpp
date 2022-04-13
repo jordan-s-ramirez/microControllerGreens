@@ -6,7 +6,8 @@
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
 DNSServer dnsServer;       // This creates a DNS server, required for the captive portal
 
-// User WiFi Settings
+// User Pref
+Preferences preferences;
 
 // booleans
 bool gotInfo = false;  // Check if we got info
@@ -195,7 +196,7 @@ void createWebServer() {
   Serial.println("Setup complete");
 }
 
-void sendAndGetData() {
+void sendAndGetData(int breakBeam, int moisture, int light) {
   // WiFiClient client;
   HTTPClient http;
 
@@ -210,9 +211,6 @@ void sendAndGetData() {
   // http.addHeader("Content-Type", "text/plain"); 
     
   // Prepare your HTTP POST request data
-  int breakBeam = 1;
-  int moisture = 101;
-  int light = 4242;
   String httpRequestData = "&api_key=" + apiKeyValue + "&breakBeam=" + breakBeam + "&moisture=" + moisture + "&light=" + light;
 
   // Send HTTP POST request
@@ -222,7 +220,11 @@ void sendAndGetData() {
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
-    Serial.println(http.getString());
+    String jsonString = http.getString();
+    Serial.println(jsonString);
+
+    // Parase
+
     Serial.println("Data was recieved"); 
   }
   else {
@@ -247,34 +249,28 @@ void resetADC() {
 }
 
 Preferences wifiLoop(Measurements measurements) {
-  Preferences preferences;
-  // if(!gotInfo) {
-  //   if(proResponse) {
-  //     // Handle WiFi
-  //     dnsServer.processNextRequest();
-  //   }
-  //   vTaskDelay(10);
-  // } 
-  // else if(WiFi.status() != WL_CONNECTED) {
-  //   connectToWifi();
-  // }
-  // else {
-  //   Serial.println("Connected!");
-  //   // Check Sensors
-  //   // Make Adjustments
-  //   // Send Data
-  //   sendAndGetData();
-  //   delay(1000);
-  // }
   saveADC();
   
-  // save adc register
-  // connect to wifi
+  // save wifi register
+  // Connect to Wifi
+  Serial.print("Connect to Wifi:");
+  Serial.println(user_wifi.ssid);
+  connectToWifi();
+
   // send sensor values to database
+  // Dummy Values
+  int breakBeam = 1;
+  int moisture = 101;
+  int light = 4242;
+  sendAndGetData(breakBeam, moisture, light);
+
   // get preferences from database
   // disconnect from wifi
-
+  // restore wifi register
+  // return preferences
+  delay(100);
   resetADC();
+
   return preferences;
 }
 
@@ -282,5 +278,10 @@ void wifiSetupLoop() {
   while(WiFi.status() != WL_CONNECTED) {
       dnsServer.processNextRequest();
       delay(10);
+
+      // Fixes Watch Dog Timer Issue
+      TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
+      TIMERG0.wdt_feed=1;
+      TIMERG0.wdt_wprotect=0;
   }
 }

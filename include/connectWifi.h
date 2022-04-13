@@ -8,6 +8,8 @@
 #include <EEPROM.h> // Save to flash
 #include <HTTPClient.h>
 #include "DataStructures.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 
 struct Settings
 {
@@ -16,7 +18,6 @@ struct Settings
 }; 
 static Settings user_wifi = {0};
 
-
 void connectToWifi();
 void webRequest(AsyncWebServerRequest *request);
 void createSAP();
@@ -24,7 +25,7 @@ void onGet();
 void onNotFound();
 void webServerSetup();
 void createWebServer();
-void sendAndGetData();
+void sendAndGetData(int breakBeam, int moisture, int light);
 Settings getWifiInfo();
 Preferences wifiLoop(Measurements measurements);
 void wifiSetupLoop();
