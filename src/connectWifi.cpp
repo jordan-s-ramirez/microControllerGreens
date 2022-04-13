@@ -6,9 +6,6 @@
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
 DNSServer dnsServer;       // This creates a DNS server, required for the captive portal
 
-// User Pref
-Preferences preferences;
-
 // booleans
 bool gotInfo = false;  // Check if we got info
 bool tryAgain = false; // For User to try again
@@ -196,7 +193,8 @@ void createWebServer() {
   Serial.println("Setup complete");
 }
 
-void sendAndGetData(int breakBeam, int moisture, int light) {
+Preferences sendAndGetData(int breakBeam, int moisture, int light) {
+  Preferences preferences;
   // WiFiClient client;
   HTTPClient http;
 
@@ -234,6 +232,8 @@ void sendAndGetData(int breakBeam, int moisture, int light) {
 
   http.end();
   delay(10000);
+
+  return preferences;
 }
 
 void saveADC() {
@@ -259,10 +259,10 @@ Preferences wifiLoop(Measurements measurements) {
 
   // send sensor values to database
   // Dummy Values
-  int breakBeam = 1;
-  int moisture = 101;
-  int light = 4242;
-  sendAndGetData(breakBeam, moisture, light);
+  // int breakBeam = 1;
+  // int moisture = 101;
+  // int light = 4242;
+  Prefences preferences = sendAndGetData(measurements.breakBeam, measurements.water, measurements.lightLevel);
 
   // get preferences from database
   // disconnect from wifi

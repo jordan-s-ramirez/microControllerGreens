@@ -25,7 +25,7 @@ void onGet();
 void onNotFound();
 void webServerSetup();
 void createWebServer();
-void sendAndGetData(int breakBeam, int moisture, int light);
+Preferences sendAndGetData(int breakBeam, int moisture, int light);
 Settings getWifiInfo();
 Preferences wifiLoop(Measurements measurements);
 void wifiSetupLoop();
