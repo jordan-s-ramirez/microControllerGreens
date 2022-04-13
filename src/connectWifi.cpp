@@ -1,5 +1,6 @@
 #include "connectWifi.h"
 #include "soc/sens_reg.h"
+#include "DataStructures.h"
 
 // Server
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
@@ -245,7 +246,8 @@ void resetADC() {
   WRITE_PERI_REG(SENS_SAR_MEAS_START2_REG, reg_c);
 }
 
-void wifiLoop() {
+Preferences wifiLoop(Measurements measurements) {
+  Preferences preferences;
   // if(!gotInfo) {
   //   if(proResponse) {
   //     // Handle WiFi
@@ -266,14 +268,14 @@ void wifiLoop() {
   // }
   saveADC();
   
-  save adc register
-  connect to wifi
-  send sensor values to database
-  get preferences from database
-  disconnect from wifi
-  
+  // save adc register
+  // connect to wifi
+  // send sensor values to database
+  // get preferences from database
+  // disconnect from wifi
+
   resetADC();
-  return preferences
+  return preferences;
 }
 
 void wifiSetupLoop() {

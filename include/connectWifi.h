@@ -7,6 +7,7 @@
 #include <WiFi.h> // Wifi
 #include <EEPROM.h> // Save to flash
 #include <HTTPClient.h>
+#include "DataStructures.h"
 
 struct Settings
 {
@@ -25,5 +26,5 @@ void webServerSetup();
 void createWebServer();
 void sendAndGetData();
 Settings getWifiInfo();
-void wifiLoop();
+Preferences wifiLoop(Measurements measurements);
 void wifiSetupLoop();

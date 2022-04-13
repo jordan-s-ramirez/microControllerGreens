@@ -24,7 +24,5 @@ void setup() {
 void loop() {
   // measurements = hardwareLoop(preferences);
 
-  // preferences = wifiLoop();
-  wifiLoop();
-
+  preferences = wifiLoop(measurements);
 }
