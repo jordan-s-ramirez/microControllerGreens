@@ -262,7 +262,7 @@ Preferences wifiLoop(Measurements measurements) {
   // int breakBeam = 1;
   // int moisture = 101;
   // int light = 4242;
-  Prefences preferences = sendAndGetData(measurements.breakBeam, measurements.water, measurements.lightLevel);
+  Preferences preferences = sendAndGetData(measurements.breakBeam, measurements.water, measurements.light);
 
   // get preferences from database
   // disconnect from wifi
