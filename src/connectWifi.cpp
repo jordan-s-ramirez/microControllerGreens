@@ -1,4 +1,5 @@
 #include "connectWifi.h"
+#include "soc/sens_reg.h"
 
 // Server
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
@@ -11,6 +12,9 @@ bool gotInfo = false;  // Check if we got info
 bool tryAgain = false; // For User to try again
 bool proResponse = true; // Stop processing response
 bool updateOnNotFound = false; // Update onNotFound
+uint64_t reg_a;
+uint64_t reg_b;
+uint64_t reg_c;
 
 // Databse
 String serverName = "https://microcontrollergreens.live/ESPSendAndRecieve.php";
@@ -229,6 +233,18 @@ void sendAndGetData() {
   delay(10000);
 }
 
+void saveADC() {
+  reg_a = READ_PERI_REG(SENS_SAR_START_FORCE_REG);
+  reg_b = READ_PERI_REG(SENS_SAR_READ_CTRL2_REG);
+  reg_c = READ_PERI_REG(SENS_SAR_MEAS_START2_REG);
+}
+
+void resetADC() {
+  WRITE_PERI_REG(SENS_SAR_START_FORCE_REG, reg_a);
+  WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b);
+  WRITE_PERI_REG(SENS_SAR_MEAS_START2_REG, reg_c);
+}
+
 void wifiLoop() {
   // if(!gotInfo) {
   //   if(proResponse) {
@@ -248,12 +264,15 @@ void wifiLoop() {
   //   sendAndGetData();
   //   delay(1000);
   // }
-  save wifi register
+  saveADC();
+  
+  save adc register
   connect to wifi
   send sensor values to database
   get preferences from database
   disconnect from wifi
-  restore wifi register
+  
+  resetADC();
   return preferences
 }
 
