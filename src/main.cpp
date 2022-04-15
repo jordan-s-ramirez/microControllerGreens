@@ -23,6 +23,9 @@ void setup() {
 
 void loop() {
   // measurements = hardwareLoop(preferences);
-
+  measurements.light = 100;
+  measurements.breakBeam = 0;
+  measurements.water = 1000;
   preferences = wifiLoop(measurements);
+  delay(100);
 }

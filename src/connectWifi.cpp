@@ -199,9 +199,6 @@ Preferences sendAndGetData(Measurements measurements) {
   int breakBeam = measurements.breakBeam;
   int moisture = measurements.water;
   int light = measurements.light;
-  Serial.println(breakBeam);
-  Serial.println(moisture);
-  Serial.println(light);
 
   // Your Domain name with URL path or IP address with path
   // http.begin(client, serverName);
