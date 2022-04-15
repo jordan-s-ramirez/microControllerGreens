@@ -262,13 +262,13 @@ void resetADC() {
 }
 
 Preferences wifiLoop(Measurements measurements) {
-  // saveADC();
+  saveADC();
   
   // save wifi register
   // Connect to Wifi
   Serial.print("Connect to Wifi:");
   Serial.println(user_wifi.ssid);
-  // connectToWifi();
+  connectToWifi();
 
   // send sensor values to database
   Preferences preferences = sendAndGetData(measurements);
@@ -278,7 +278,7 @@ Preferences wifiLoop(Measurements measurements) {
   // restore wifi register
   // return preferences
   delay(100);
-  // resetADC();
+  resetADC();
 
   return preferences;
 }
