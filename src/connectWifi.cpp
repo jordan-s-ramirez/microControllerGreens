@@ -9,8 +9,7 @@ DNSServer dnsServer;       // This creates a DNS server, required for the captiv
 // booleans
 bool gotInfo = false;  // Check if we got info
 bool tryAgain = false; // For User to try again
-bool proResponse = true; // Stop processing response
-bool updateOnNotFound = false; // Update onNotFound
+
 uint64_t reg_a;
 uint64_t reg_b;
 uint64_t reg_c;
@@ -63,7 +62,10 @@ void webRequest(AsyncWebServerRequest *request) {
   response->printf("<!doctype html><html lang='en'><head><meta charset='utf-8'>");
   response->printf("<meta name='viewport' content='width=device-width, initial-scale=1'>");
 
-  if(tryAgain) {
+  if(gotInfo) {
+    response->printf("<h2>Connected! Please visit microcontrollergreens.live</h2>");
+  }
+  else if(tryAgain) {
     response->printf("<h2>Incorrect user WiFi data, please try again!</h2>");
   }
 
@@ -115,9 +117,6 @@ void onGet() {
     strncpy(user_wifi.password, password.c_str(), sizeof(user_wifi.password));
     user_wifi.ssid[ssid.length()] = user_wifi.password[password.length()] = '\0'; 
 
-    // Turn off responses
-    proResponse = false;
-
     // Connect to WiFi
     connectToWifi();
 
@@ -134,7 +133,6 @@ void onGet() {
       }
 
       // Update responses
-      proResponse = true;
       webRequest(request);
     }
     else {
@@ -149,9 +147,9 @@ void onGet() {
       server.end();
       vTaskDelay(10);
       Serial.println("Turn off SAP");
-      WiFi.softAPdisconnect(false); // false to not turn off Wifi.mode()
+      WiFi.softAPdisconnect(true); // false to not turn off Wifi.mode()
       vTaskDelay(10);
-
+      
     }
   });
 }
@@ -193,10 +191,17 @@ void createWebServer() {
   Serial.println("Setup complete");
 }
 
-Preferences sendAndGetData(int breakBeam, int moisture, int light) {
+Preferences sendAndGetData(Measurements measurements) {
   Preferences preferences;
   // WiFiClient client;
   HTTPClient http;
+
+  int breakBeam = measurements.breakBeam;
+  int moisture = measurements.water;
+  int light = measurements.light;
+  Serial.println(breakBeam);
+  Serial.println(moisture);
+  Serial.println(light);
 
   // Your Domain name with URL path or IP address with path
   // http.begin(client, serverName);
@@ -218,12 +223,23 @@ Preferences sendAndGetData(int breakBeam, int moisture, int light) {
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
-    String jsonString = http.getString();
-    Serial.println(jsonString);
+    String infoString = http.getString();
+    Serial.println(infoString);
 
-    // Parase
-
-    Serial.println("Data was recieved"); 
+    // Parase info
+    if(infoString.length() > 1) {
+      int lightLevel = (int)infoString[0] - '0';
+      int waterLevel = (int)infoString[1] - '0';
+      preferences.lightLevel = (LightLevel)lightLevel;
+      preferences.waterLevel = (WaterLevel)waterLevel;
+      Serial.println("Data was recieved"); 
+      Serial.println(infoString);
+    } 
+    else {
+      preferences.lightLevel = (LightLevel)2;
+      preferences.waterLevel = (WaterLevel)2;
+      Serial.println("Data was NOT recieved"); 
+    }
   }
   else {
     Serial.print("Error code: ");
@@ -249,27 +265,23 @@ void resetADC() {
 }
 
 Preferences wifiLoop(Measurements measurements) {
-  saveADC();
+  // saveADC();
   
   // save wifi register
   // Connect to Wifi
   Serial.print("Connect to Wifi:");
   Serial.println(user_wifi.ssid);
-  connectToWifi();
+  // connectToWifi();
 
   // send sensor values to database
-  // Dummy Values
-  // int breakBeam = 1;
-  // int moisture = 101;
-  // int light = 4242;
-  Preferences preferences = sendAndGetData(measurements.breakBeam, measurements.water, measurements.light);
+  Preferences preferences = sendAndGetData(measurements);
 
   // get preferences from database
   // disconnect from wifi
   // restore wifi register
   // return preferences
   delay(100);
-  resetADC();
+  // resetADC();
 
   return preferences;
 }
@@ -284,4 +296,5 @@ void wifiSetupLoop() {
       TIMERG0.wdt_feed=1;
       TIMERG0.wdt_wprotect=0;
   }
+  // connectToWifi();
 }
