@@ -31,7 +31,6 @@
 
 // Variables
 static unsigned long lastPumpOnTime = millis();
-static unsigned long lastPumpCooldownTime = millis();
 
 // Code
 // Sets up PWM (for lights), Light sensor, Break beam sensor, Soil moisture sensor, and Pump
@@ -65,9 +64,8 @@ Measurements hardwareLoop(Preferences preferences) {
   // Pump
   unsigned long now = millis();
   // if past the cooldown time and soil moisture is above(dryer) than preference indicates, turn pump on and reset times
-  if ((now - lastPumpCooldownTime)/1000 > PUMP_COOLDOWN && measurements.water > (DRY_SOIL_MEASUREMENT - ((int)preferences.waterLevel * ((DRY_SOIL_MEASUREMENT - WET_SOIL_MEASUREMENT)/5)))) {
+  if ((now - lastPumpOnTime)/1000 > PUMP_COOLDOWN && measurements.water > (DRY_SOIL_MEASUREMENT - ((int)preferences.waterLevel * ((DRY_SOIL_MEASUREMENT - WET_SOIL_MEASUREMENT)/5)))) {
     lastPumpOnTime = now;
-    lastPumpCooldownTime = now;
     digitalWrite(PUMP_PIN, HIGH);
   }
   // if past pump on time, turn it off
