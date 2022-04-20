@@ -13,6 +13,9 @@
 #define LIGHT_CEN 18
 #define LIGHT_SCL 22
 #define LIGHT_SDA 21
+    // calibration stuff
+#define LIGHT_TOLERANCE 0.1 // percentage in decimal form
+static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates with lightLevel enum values
   // Break beam sensor
 #define BREAKBEAM_PIN 4
   // Soil moisture sensor
@@ -30,6 +33,7 @@
 
 
 // Variables
+static unsigned int PWMDutyCycle = 0;
 static unsigned long lastPumpOnTime = millis();
 
 // Code
@@ -73,5 +77,12 @@ Measurements hardwareLoop(Preferences preferences) {
     digitalWrite(PUMP_PIN, LOW);
   }
   // TODO (Lights w/ PWM) -> need calibration vals
+  preferences.lightLevel = MEDIUM_LIGHT;
+  if(measurements.light < (1-LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle < 100) {
+    PWMDutyCycle++;
+  } else if (measurements.light > (1+LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle > 0) {
+    PWMDutyCycle--;
+  }
+  setPWMDutyCycle(PWMDutyCycle);
   return measurements;
 }
