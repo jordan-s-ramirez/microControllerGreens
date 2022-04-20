@@ -76,8 +76,7 @@ Measurements hardwareLoop(Preferences preferences) {
   if ((now - lastPumpOnTime)/1000 > PUMP_ON_TIME) {
     digitalWrite(PUMP_PIN, LOW);
   }
-  // TODO (Lights w/ PWM) -> need calibration vals
-  preferences.lightLevel = MEDIUM_LIGHT;
+  // Lights
   if(measurements.light < (1-LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle < 100) {
     PWMDutyCycle++;
   } else if (measurements.light > (1+LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle > 0) {
