@@ -19,7 +19,7 @@ static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates 
   // Break beam sensor
 #define BREAKBEAM_PIN 4
   // Soil moisture sensor
-#define SOILMOISTURE_PIN 15
+#define SOILMOISTURE_PIN 34
   // Pump
 #define PUMP_PIN 27
     // seconds pump is turned on when soil moisture is low

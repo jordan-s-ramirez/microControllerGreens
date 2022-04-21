@@ -10,10 +10,6 @@ DNSServer dnsServer;       // This creates a DNS server, required for the captiv
 bool gotInfo = false;  // Check if we got info
 bool tryAgain = false; // For User to try again
 
-uint64_t reg_a;
-uint64_t reg_b;
-uint64_t reg_c;
-
 // Databse
 String serverName = "https://microcontrollergreens.live/ESPSendAndRecieve.php";
 // Keep this API Key value to be compatible with the PHP code provided in the project page. 
@@ -147,7 +143,7 @@ void onGet() {
       server.end();
       vTaskDelay(10);
       Serial.println("Turn off SAP");
-      WiFi.softAPdisconnect(true); // false to not turn off Wifi.mode()
+      WiFi.softAPdisconnect(false); // false to not turn off Wifi.mode()
       vTaskDelay(10);
       
     }
@@ -219,9 +215,9 @@ Preferences sendAndGetData(Measurements measurements) {
   
   if (httpResponseCode>0) {
     Serial.print("HTTP Response code: ");
-    Serial.println(httpResponseCode);
+    // Serial.println(httpResponseCode);
     String infoString = http.getString();
-    Serial.println(infoString);
+    // Serial.println(infoString);
 
     // Parase info
     if(infoString.length() > 1) {
@@ -249,21 +245,7 @@ Preferences sendAndGetData(Measurements measurements) {
   return preferences;
 }
 
-void saveADC() {
-  reg_a = READ_PERI_REG(SENS_SAR_START_FORCE_REG);
-  reg_b = READ_PERI_REG(SENS_SAR_READ_CTRL2_REG);
-  reg_c = READ_PERI_REG(SENS_SAR_MEAS_START2_REG);
-}
-
-void resetADC() {
-  WRITE_PERI_REG(SENS_SAR_START_FORCE_REG, reg_a);
-  WRITE_PERI_REG(SENS_SAR_READ_CTRL2_REG, reg_b);
-  WRITE_PERI_REG(SENS_SAR_MEAS_START2_REG, reg_c);
-}
-
-Preferences wifiLoop(Measurements measurements) {
-  saveADC();
-  
+Preferences wifiLoop(Measurements measurements) {  
   // save wifi register
   // Connect to Wifi
   Serial.print("Connect to Wifi:");
@@ -278,7 +260,6 @@ Preferences wifiLoop(Measurements measurements) {
   // restore wifi register
   // return preferences
   delay(100);
-  resetADC();
 
   return preferences;
 }
