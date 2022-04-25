@@ -20,6 +20,7 @@ static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates 
 #define BREAKBEAM_PIN 4
   // Soil moisture sensor
 #define SOILMOISTURE_PIN 34
+#define SOIL_MOISTURE_TRIGGER_COUNT 1000 // large numbers are more stable for pump logic but depend on low to no delay between measurements
   // Pump
 #define PUMP_PIN 27
     // seconds pump is turned on when soil moisture is low
@@ -35,6 +36,7 @@ static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates 
 // Variables
 static unsigned int PWMDutyCycle = 0;
 static unsigned long lastPumpOnTime = millis();
+static unsigned long soilMoistureCounter = 0; // soil moisture counter (tracks number of recent moisture measurements that are drier than threshold, triggers pump at SOIL_MOISTURE_TRIGGER_COUNT)
 
 // Code
 // Sets up PWM (for lights), Light sensor, Break beam sensor, Soil moisture sensor, and Pump
@@ -66,9 +68,16 @@ Measurements hardwareLoop(Preferences preferences) {
   measurements.breakBeam = (bool) digitalRead(BREAKBEAM_PIN);
   // Do stuff based on preferences and measurements
   // Pump
+  // update counter
+  if (measurements.water > (DRY_SOIL_MEASUREMENT - ((int)preferences.waterLevel * ((DRY_SOIL_MEASUREMENT - WET_SOIL_MEASUREMENT)/5)))) {
+    soilMoistureCounter++;
+  } else if (soilMoistureCounter > 0) {
+    soilMoistureCounter--;
+  }
   unsigned long now = millis();
   // if past the cooldown time and soil moisture is above(dryer) than preference indicates, turn pump on and reset times
-  if ((now - lastPumpOnTime)/1000 > PUMP_COOLDOWN && measurements.water > (DRY_SOIL_MEASUREMENT - ((int)preferences.waterLevel * ((DRY_SOIL_MEASUREMENT - WET_SOIL_MEASUREMENT)/5)))) {
+  if ((now - lastPumpOnTime)/1000 > PUMP_COOLDOWN && soilMoistureCounter >= SOIL_MOISTURE_TRIGGER_COUNT) {
+    soilMoistureCounter=0;
     lastPumpOnTime = now;
     digitalWrite(PUMP_PIN, HIGH);
   }

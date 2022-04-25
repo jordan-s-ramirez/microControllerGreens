@@ -17,7 +17,9 @@ unsigned long wifiTimer = 0;
 void setup() {
   Serial.begin(9600);
 
+  Serial.println("entering hardware setup");
   hardwareSetup();
+  Serial.println("exiting hardware setup");
 
   createSAP();
   createWebServer();
