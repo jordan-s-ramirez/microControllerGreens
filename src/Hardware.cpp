@@ -17,7 +17,7 @@
 #define LIGHT_TOLERANCE 0.1 // percentage in decimal form
 static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates with lightLevel enum values
   // Break beam sensor
-#define BREAKBEAM_PIN 4
+#define BREAKBEAM_PIN 2
   // Soil moisture sensor
 #define SOILMOISTURE_PIN 34
 #define SOIL_MOISTURE_TRIGGER_COUNT 1000 // large numbers are more stable for pump logic but depend on low to no delay between measurements
