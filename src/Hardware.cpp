@@ -43,7 +43,7 @@ static unsigned long soilMoistureCounter = 0; // soil moisture counter (tracks n
 void hardwareSetup() {
   ////////////////////////////////////////////////
   // Set up Light Sensor
-  setupLightSensor(LIGHT_CEN, LIGHT_SCL, LIGHT_SDA);
+  //setupLightSensor(LIGHT_CEN, LIGHT_SCL, LIGHT_SDA);
   ////////////////////////////////////////
   // Set up soil moisture sensor
   pinMode(SOILMOISTURE_PIN, INPUT);
@@ -63,7 +63,7 @@ void hardwareSetup() {
 Measurements hardwareLoop(Preferences preferences) {
   Measurements measurements = {0};
   // Take measurements
-  measurements.light = getLightValue();
+  //measurements.light = getLightValue();
   measurements.water = analogRead(SOILMOISTURE_PIN);
   measurements.breakBeam = !((bool) digitalRead(BREAKBEAM_PIN));
   // Do stuff based on preferences and measurements
