@@ -1,6 +1,7 @@
 #include "connectWifi.h"
 #include "soc/sens_reg.h"
 #include "DataStructures.h"
+#include "PWM.h"
 
 // Server
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
@@ -240,13 +241,24 @@ Preferences wifiLoop(Measurements measurements) {
 }
 
 void wifiSetupLoop() {
+  unsigned int tmpPWMDutyCycle = 0;
+  int tmpDir = 1;
   while(WiFi.status() != WL_CONNECTED) {
-      dnsServer.processNextRequest();
-      delay(10);
-
-      // Fixes Watch Dog Timer Issue
-      TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
-      TIMERG0.wdt_feed=1;
-      TIMERG0.wdt_wprotect=0;
+    dnsServer.processNextRequest();
+    delay(10);
+    // make lights flash
+    tmpPWMDutyCycle += tmpDir;
+    setPWMDutyCycle(tmpPWMDutyCycle);
+    if (tmpPWMDutyCycle >= 100) {
+      tmpDir = -1;
+    } else if (tmpPWMDutyCycle <= 0) {
+      tmpDir = 1;
+    }
+    // Fixes Watch Dog Timer Issue
+    TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
+    TIMERG0.wdt_feed=1;
+    TIMERG0.wdt_wprotect=0;
   }
+  // reset lights after wifi setup is finished
+  setPWMDutyCycle(0);
 }
