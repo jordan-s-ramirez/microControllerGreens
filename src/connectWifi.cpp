@@ -33,14 +33,18 @@ void connectToWifi(const char* ssid, const char* password)
 
   // Try WiFi
   // Connect to WiFi
-  while (WiFi.status() != WL_CONNECTED)
+  int tries = 0;
+  while (WiFi.status() != WL_CONNECTED && tries < 10)
   {
     delay(500);
     Serial.println("Trying to Connect... ");
+    tries++;
   }
   // Check WiFi
-  Serial.print("Connected to WiFi!\n");
-  Serial.println(WiFi.localIP());
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("Connected to WiFi!\n");
+    Serial.println(WiFi.localIP());
+  }
 }
 
 void webRequest(AsyncWebServerRequest *request) {
@@ -207,8 +211,7 @@ Preferences sendAndGetData(Measurements measurements) {
       Serial.println(infoString);
     } 
     else {
-      preferences.lightLevel = (LightLevel)2;
-      preferences.waterLevel = (WaterLevel)2;
+      // do not update settings, use old values
       Serial.println("Data was NOT recieved"); 
     }
   }
