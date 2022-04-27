@@ -65,7 +65,7 @@ Measurements hardwareLoop(Preferences preferences) {
   // Take measurements
   measurements.light = getLightValue();
   measurements.water = analogRead(SOILMOISTURE_PIN);
-  measurements.breakBeam = (bool) digitalRead(BREAKBEAM_PIN);
+  measurements.breakBeam = !((bool) digitalRead(BREAKBEAM_PIN));
   // Do stuff based on preferences and measurements
   // Pump
   // update counter
