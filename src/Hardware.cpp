@@ -14,8 +14,9 @@
 #define LIGHT_SCL 22
 #define LIGHT_SDA 21
     // calibration stuff
-#define LIGHT_TOLERANCE 0.1 // percentage in decimal form
-static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates with lightLevel enum values
+#define LIGHT_TOLERANCE 0.05 // percentage in decimal form
+static unsigned int lux_values[5] = {0, 13, 155, 300, 1000000}; // coordinates with lightLevel enum values
+#define LIGHT_COOLDOWN (15/100) // numerator is seconds to change from 0-100, denominator used to convert
   // Break beam sensor
 #define BREAKBEAM_PIN 2
   // Soil moisture sensor
@@ -35,15 +36,16 @@ static unsigned int lux_values[5] = {0, 100, 750, 5000, 100000}; // coordinates 
 
 // Variables
 static unsigned int PWMDutyCycle = 0;
-static unsigned long lastPumpOnTime = millis();
+static unsigned long lastPWMChangeTime = millis();
 static unsigned long soilMoistureCounter = 0; // soil moisture counter (tracks number of recent moisture measurements that are drier than threshold, triggers pump at SOIL_MOISTURE_TRIGGER_COUNT)
+static unsigned long lastPumpOnTime = millis();
 
 // Code
 // Sets up PWM (for lights), Light sensor, Break beam sensor, Soil moisture sensor, and Pump
 void hardwareSetup() {
   ////////////////////////////////////////////////
   // Set up Light Sensor
-  //setupLightSensor(LIGHT_CEN, LIGHT_SCL, LIGHT_SDA);
+  setupLightSensor(LIGHT_CEN, LIGHT_SCL, LIGHT_SDA);
   ////////////////////////////////////////
   // Set up soil moisture sensor
   pinMode(SOILMOISTURE_PIN, INPUT);
@@ -63,7 +65,7 @@ void hardwareSetup() {
 Measurements hardwareLoop(Preferences preferences) {
   Measurements measurements = {0};
   // Take measurements
-  //measurements.light = getLightValue();
+  measurements.light = getLightValue();
   measurements.water = analogRead(SOILMOISTURE_PIN);
   measurements.breakBeam = !((bool) digitalRead(BREAKBEAM_PIN));
   // Do stuff based on preferences and measurements
@@ -86,11 +88,14 @@ Measurements hardwareLoop(Preferences preferences) {
     digitalWrite(PUMP_PIN, LOW);
   }
   // Lights
-  if(measurements.light < (1-LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle < 100) {
-    PWMDutyCycle++;
-  } else if (measurements.light > (1+LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle > 0) {
-    PWMDutyCycle--;
+  if ((now - lastPWMChangeTime)/1000 > LIGHT_COOLDOWN) {
+    lastPWMChangeTime = now;
+    if(measurements.light < (1-LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle < 100) {
+      PWMDutyCycle++;
+    } else if (measurements.light > (1+LIGHT_TOLERANCE)*lux_values[preferences.lightLevel] && PWMDutyCycle > 0) {
+      PWMDutyCycle--;
+    }
+    setPWMDutyCycle(PWMDutyCycle);
   }
-  setPWMDutyCycle(PWMDutyCycle);
   return measurements;
 }
