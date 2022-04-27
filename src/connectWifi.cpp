@@ -1,6 +1,7 @@
 #include "connectWifi.h"
 #include "soc/sens_reg.h"
 #include "DataStructures.h"
+#include "PWM.h"
 
 // Server
 AsyncWebServer server(80); // This creates a web server, required in order to host a page for connected devices
@@ -16,38 +17,34 @@ String serverName = "https://microcontrollergreens.live/ESPSendAndRecieve.php";
 // If you change the apiKeyValue value, the PHP file /post-esp-data.php also needs to have the same key 
 String apiKeyValue = "tPmAT5Ab3j7F9";
 
-void connectToWifi()
+void wifiSetup() {
+  createSAP();
+  createWebServer();
+  wifiSetupLoop();
+}
+
+void connectToWifi(const char* ssid, const char* password)
 {
   // Check to see if we got info
-  if (user_wifi.ssid[0] != 0)
+  Serial.println("Trying Connection with:");
+  Serial.println(ssid);
+  Serial.println(password);
+
+  WiFi.begin(ssid, password);
+
+  // Try WiFi
+  // Connect to WiFi
+  int tries = 0;
+  while (WiFi.status() != WL_CONNECTED && tries < 10)
   {
-    Serial.println("Trying Connection with:");
-    Serial.println(user_wifi.ssid);
-    Serial.println(user_wifi.password);
-
-    WiFi.begin(user_wifi.ssid, user_wifi.password);
-
-    // Try WiFi
-    byte tries = 0;
-    // Connect to WiFi
-    while ((WiFi.status() != WL_CONNECTED ) && tries < 10)
-    {
-      delay(500);
-      Serial.println("Trying to Connect... ");
-      tries++;
-    }
+    delay(500);
+    Serial.println("Trying to Connect... ");
+    tries++;
   }
-
   // Check WiFi
-  if (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.println("Failed to Connect to WiFi!");
-  }
-  else
-  {
+  if (WiFi.status() == WL_CONNECTED) {
     Serial.print("Connected to WiFi!\n");
     Serial.println(WiFi.localIP());
-    gotInfo = true;
   }
 }
 
@@ -108,44 +105,30 @@ void onGet() {
       Serial.println("Password: " + password);
     }
 
-    // Transfer User data to settings
-    strncpy(user_wifi.ssid, ssid.c_str(), sizeof(user_wifi.ssid));
-    strncpy(user_wifi.password, password.c_str(), sizeof(user_wifi.password));
-    user_wifi.ssid[ssid.length()] = user_wifi.password[password.length()] = '\0'; 
-
     // Connect to WiFi
-    connectToWifi();
+    connectToWifi(ssid.c_str(), password.c_str());
 
     if(WiFi.status() != WL_CONNECTED) {
       // Turn on server response
       Serial.println("Set Try again to True");
       tryAgain = true;
 
-      // Clean user_wifi
-      Serial.print("Cleaning old WiFi Data\n");
-      for(int i = 0; i < 30; i++) {
-        user_wifi.password[i] = 0;
-        user_wifi.ssid[i] = 0;
-      }
-
       // Update responses
       webRequest(request);
     }
     else {
-      request->send(200, "text/html", "<h1>WiFi SSID: " + ssid + ", and Password: " + password + " Saved! Trying connection... If not connected please try again, and rejoin MicroController Greens WiFi </h1>");
-      // Get Info
       gotInfo = true;
+      webRequest(request);
       // Turn off webserver
       Serial.println("Turn off DNS");
       dnsServer.stop();
-      vTaskDelay(10);
+      delay(10);
       Serial.println("Turn off Server");
       server.end();
-      vTaskDelay(10);
+      delay(10);
       Serial.println("Turn off SAP");
       WiFi.softAPdisconnect(false); // false to not turn off Wifi.mode()
-      vTaskDelay(10);
-      
+      delay(10);
     }
   });
 }
@@ -219,7 +202,7 @@ Preferences sendAndGetData(Measurements measurements) {
     String infoString = http.getString();
     // Serial.println(infoString);
 
-    // Parase info
+    // Parse info
     if(infoString.length() > 1) {
       int lightLevel = (int)infoString[0] - '0';
       int waterLevel = (int)infoString[1] - '0';
@@ -229,8 +212,7 @@ Preferences sendAndGetData(Measurements measurements) {
       Serial.println(infoString);
     } 
     else {
-      preferences.lightLevel = (LightLevel)2;
-      preferences.waterLevel = (WaterLevel)2;
+      // do not update settings, use old values
       Serial.println("Data was NOT recieved"); 
     }
   }
@@ -245,13 +227,7 @@ Preferences sendAndGetData(Measurements measurements) {
   return preferences;
 }
 
-Preferences wifiLoop(Measurements measurements) {  
-  // save wifi register
-  // Connect to Wifi
-  Serial.print("Connect to Wifi:");
-  Serial.println(user_wifi.ssid);
-  connectToWifi();
-
+Preferences wifiLoop(Measurements measurements) {
   // send sensor values to database
   Preferences preferences = sendAndGetData(measurements);
 
@@ -265,14 +241,24 @@ Preferences wifiLoop(Measurements measurements) {
 }
 
 void wifiSetupLoop() {
+  unsigned int tmpPWMDutyCycle = 0;
+  int tmpDir = 1;
   while(WiFi.status() != WL_CONNECTED) {
-      dnsServer.processNextRequest();
-      delay(10);
-
-      // Fixes Watch Dog Timer Issue
-      TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
-      TIMERG0.wdt_feed=1;
-      TIMERG0.wdt_wprotect=0;
+    dnsServer.processNextRequest();
+    delay(10);
+    // make lights flash
+    tmpPWMDutyCycle += tmpDir;
+    setPWMDutyCycle(tmpPWMDutyCycle);
+    if (tmpPWMDutyCycle >= 100) {
+      tmpDir = -1;
+    } else if (tmpPWMDutyCycle <= 0) {
+      tmpDir = 1;
+    }
+    // Fixes Watch Dog Timer Issue
+    TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
+    TIMERG0.wdt_feed=1;
+    TIMERG0.wdt_wprotect=0;
   }
-  // connectToWifi();
+  // reset lights after wifi setup is finished
+  setPWMDutyCycle(0);
 }

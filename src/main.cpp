@@ -21,9 +21,9 @@ void setup() {
   hardwareSetup();
   Serial.println("exiting hardware setup");
 
-  createSAP();
-  createWebServer();
-  wifiSetupLoop();
+  Serial.println("entering wifi setup");
+  wifiSetup();
+  Serial.println("exiting wifi setup");
 }
 
 void loop() {
