@@ -259,6 +259,14 @@ void wifiSetupLoop() {
     TIMERG0.wdt_feed=1;
     TIMERG0.wdt_wprotect=0;
   }
-  // reset lights after wifi setup is finished
+  // flash and reset lights after wifi setup is finished
+  setPWMDutyCycle(0);
+  delay(500);
+  setPWMDutyCycle(100);
+  delay(500);
+    setPWMDutyCycle(0);
+  delay(500);
+  setPWMDutyCycle(100);
+  delay(500);
   setPWMDutyCycle(0);
 }
