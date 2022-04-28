@@ -16,6 +16,7 @@ typedef struct Preferences Preferences;
 // Measurements - returned from hardware loop, sent to wifi loop
 struct Measurements {
     float light;
+    unsigned int PWMDutyCycle;
     uint16_t water;
     bool breakBeam;
 };

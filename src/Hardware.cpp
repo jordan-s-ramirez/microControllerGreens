@@ -64,7 +64,7 @@ void hardwareSetup() {
 // and returns the measurements
 Measurements hardwareLoop(Preferences preferences) {
   Measurements measurements = {0};
-  // Take measurements
+  // Take measurements (get PWM value later)
   measurements.light = getLightValue();
   measurements.water = analogRead(SOILMOISTURE_PIN);
   measurements.breakBeam = !((bool) digitalRead(BREAKBEAM_PIN));
@@ -97,5 +97,7 @@ Measurements hardwareLoop(Preferences preferences) {
     }
     setPWMDutyCycle(PWMDutyCycle);
   }
+  measurements.PWMDutyCycle = PWMDutyCycle;
+  // return
   return measurements;
 }

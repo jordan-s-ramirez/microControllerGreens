@@ -178,6 +178,7 @@ Preferences sendAndGetData(Measurements measurements) {
   int breakBeam = measurements.breakBeam;
   int moisture = measurements.water;
   int light = measurements.light;
+  int PWMDutyCycle = measurements.PWMDutyCycle;
 
   // Your Domain name with URL path or IP address with path
   // http.begin(client, serverName);
@@ -190,7 +191,7 @@ Preferences sendAndGetData(Measurements measurements) {
   // http.addHeader("Content-Type", "text/plain"); 
     
   // Prepare your HTTP POST request data
-  String httpRequestData = "&api_key=" + apiKeyValue + "&breakBeam=" + breakBeam + "&moisture=" + moisture + "&light=" + light;
+  String httpRequestData = "&api_key=" + apiKeyValue + "&breakBeam=" + breakBeam + "&moisture=" + moisture + "&light=" + light + "&PWMDutyCycle=" + PWMDutyCycle;
 
   // Send HTTP POST request
   int httpResponseCode = http.POST(httpRequestData);
