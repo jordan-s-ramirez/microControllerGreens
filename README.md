@@ -3,6 +3,8 @@
 ## About
 Introducing the Micro Controller Greens - a compact, high-tech solution for growing your own herbs and plants at home. This sleek and modern device fits perfectly on any kitchen counter, and allows you to easily control and monitor the growing conditions of your plants via a convenient smartphone app. The grower features advanced automated controls for humidity and light settings, allowing you to customize the environment to perfectly suit the needs of your plants. With its easy-to-use interface and intuitive design, the Micro Controller Greens Grower makes it easy to enjoy fresh, homegrown herbs and plants all year round.
 ![Example 1](./photos/1.PNG)
+## Video Demo
+https://youtu.be/Y8MISCDRqtM?
 ## Hardware
 * Peristaltic Pump 12v
 * Soil Moisture Sensor
@@ -22,5 +24,3 @@ On inital start up the ESP32 microcontroller will use its on board wifi, and con
 ![Example 1](./photos/3.PNG)
 ![Example 1](./photos/4.PNG)
 The user will be able to view all the sensor data and change light and humidity setting on the web app online. Web app: https://github.com/jordan-s-ramirez/microControllerGreensWebsite
-## Video Demo
-https://youtu.be/Y8MISCDRqtM?
